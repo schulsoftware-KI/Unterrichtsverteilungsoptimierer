@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- ClosedXML liest/schreibt .xlsm ohne Excel-Installation. Beim ersten Build per NuGet wiederherstellen. -->
+    <PackageReference Include="ClosedXML" Version="0.104.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UvOptimierer.Core\UvOptimierer.Core.csproj" />
+  </ItemGroup>
+</Project>

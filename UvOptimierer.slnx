@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/UvOptimierer.Core/UvOptimierer.Core.csproj" />
+    <Project Path="src/UvOptimierer.Excel/UvOptimierer.Excel.csproj" />
+    <Project Path="src/UvOptimierer.CpSat/UvOptimierer.CpSat.csproj" />
+    <Project Path="src/UvOptimierer.App/UvOptimierer.App.csproj" />
+    <Project Path="src/UvOptimierer.Ui/UvOptimierer.Ui.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/UvOptimierer.Tests/UvOptimierer.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UV-Optimierer — automatische Unterrichtsverteilung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14202b; --paper:#f6f7f9; --card:#ffffff;
+    --line:#d7dee6; --muted:#5d6b78;
+    --teal:#1f6f6b; --teal-dark:#134a47; --amber:#a9701a;
+    --grid:#e7ecf1;
+    --sans:"IBM Plex Sans",system-ui,sans-serif;
+    --disp:"Space Grotesk",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--teal);text-underline-offset:2px}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:var(--disp);font-weight:700;line-height:1.1;letter-spacing:-.01em}
+
+  /* ---- Hero ---- */
+  header.hero{background:var(--ink);color:#eef2f6;padding:64px 0 56px;position:relative;overflow:hidden}
+  .hero .wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:40px;align-items:center}
+  .hero h1{font-size:clamp(2.3rem,5vw,3.6rem);margin:0 0 14px;color:#fff}
+  .hero p.lead{font-size:1.18rem;color:#b9c6d2;margin:0 0 26px;max-width:34ch}
+  .kicker{font-family:var(--disp);font-size:.95rem;color:#6fb4ae;margin:0 0 18px}
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px}
+  .btn{display:inline-block;padding:12px 20px;border-radius:8px;font-weight:600;
+       text-decoration:none;font-family:var(--disp)}
+  .btn.primary{background:var(--teal);color:#fff}
+  .btn.primary:hover{background:#278a84}
+  .btn.ghost{border:1px solid #3a4b5b;color:#dce4ec}
+  .btn.ghost:hover{border-color:#6fb4ae;color:#fff}
+
+  /* schedule-grid motif */
+  .stundenplan{border:1px solid #2c3d4d;border-radius:10px;overflow:hidden;
+       display:grid;grid-template-columns:repeat(5,1fr);background:#1b2a38}
+  .stundenplan div{border:1px solid #24384a;min-height:44px;display:flex;
+       align-items:center;justify-content:center;font-family:var(--disp);
+       font-size:.9rem;color:#8ea4b6}
+  .stundenplan div.f{background:#21625e;color:#eafff9}
+  .stundenplan div.g{background:#2d4a63;color:#dbe9f6}
+
+  /* ---- Sections ---- */
+  section{padding:56px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:1.9rem;margin:0 0 8px}
+  section .sub{color:var(--muted);margin:0 0 32px;max-width:60ch}
+
+  .funcs{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .func{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+  .func h3{font-size:1.15rem;margin:0 0 6px}
+  .func p{margin:0;color:var(--muted);font-size:.97rem}
+  .func .tag{font-family:var(--disp);font-size:.78rem;color:var(--teal);
+       display:inline-block;margin-top:12px;border:1px solid #bfe0dc;
+       background:#effaf8;border-radius:5px;padding:2px 8px}
+
+  /* workflow */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:step}
+  .flow .step{position:relative;padding:20px 18px;border:1px solid var(--line);
+       background:var(--card);border-right:none}
+  .flow .step:last-child{border-right:1px solid var(--line)}
+  .flow .step:first-child{border-radius:10px 0 0 10px}
+  .flow .step:last-child{border-radius:0 10px 10px 0}
+  .flow .step b{font-family:var(--disp);display:block;margin-bottom:6px}
+  .flow .step span{color:var(--muted);font-size:.92rem}
+  .flow .step::before{counter-increment:step;content:counter(step);
+       font-family:var(--disp);font-weight:700;color:var(--teal);
+       font-size:.9rem;display:block;margin-bottom:10px}
+
+  table.cols{width:100%;border-collapse:collapse;background:var(--card);
+       border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  table.cols th,table.cols td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);font-size:.95rem}
+  table.cols th{background:#eef2f6;font-family:var(--disp);font-weight:600}
+  table.cols code{font-family:"Space Grotesk",monospace;color:var(--amber)}
+  table.cols tr:last-child td{border-bottom:none}
+
+  .note{background:#fff8ec;border:1px solid #e6d6b0;border-radius:10px;
+        padding:16px 18px;color:#6a5316;font-size:.95rem;margin-top:22px}
+
+  .dl{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+  .dl a.card{display:block;background:var(--card);border:1px solid var(--line);
+       border-radius:10px;padding:22px;text-decoration:none;color:inherit}
+  .dl a.card:hover{border-color:var(--teal)}
+  .dl a.card b{font-family:var(--disp);font-size:1.1rem;display:block;margin-bottom:4px}
+  .dl a.card span{color:var(--muted);font-size:.95rem}
+
+  footer{padding:40px 0 64px;color:var(--muted);font-size:.9rem}
+  ul.plain{margin:0;padding-left:18px;color:var(--muted)}
+  ul.plain li{margin:.3em 0}
+
+  @media (max-width:760px){
+    .hero .wrap{grid-template-columns:1fr}
+    .funcs{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr}
+    .flow .step{border-right:1px solid var(--line);border-bottom:none;border-radius:0}
+    .flow .step:first-child{border-radius:10px 10px 0 0}
+    .flow .step:last-child{border-radius:0 0 10px 10px}
+    .dl{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <p class="kicker">Unterrichtsverteilung · CP-SAT-Optimierung</p>
+      <h1>UV-Optimierer</h1>
+      <p class="lead">Verteilt Fächer und Klassen automatisch auf Lehrkräfte — mit
+        harten Regeln, ausgewogener Last und nachvollziehbaren Auswertungen.</p>
+      <div class="cta-row">
+        <!-- GitHub-Adresse hier eintragen: -->
+        <a class="btn primary" href="https://github.com/DEIN-KONTO/uv-optimierer/releases">Programm herunterladen</a>
+        <a class="btn ghost" href="https://github.com/DEIN-KONTO/uv-optimierer">Auf GitHub ansehen</a>
+      </div>
+    </div>
+    <div class="stundenplan" aria-hidden="true">
+      <div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div>
+      <div class="f">D</div><div class="g">M</div><div>GE</div><div class="f">D</div><div>SP</div>
+      <div>E</div><div class="f">D</div><div class="g">M</div><div>BI</div><div class="g">M</div>
+      <div class="g">M</div><div>KU</div><div class="f">D</div><div>E</div><div>GE</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="funktionen">
+  <div class="wrap">
+    <h2>Funktionen</h2>
+    <p class="sub">Die frühere VBA-Automatik ist vollständig in ein eigenständiges
+      Windows-Programm überführt. Jede Funktion arbeitet auf der Excel-Datei und schreibt
+      ihre Ergebnisse in eigene Blätter.</p>
+    <div class="funcs">
+      <div class="func">
+        <h3>Optimieren</h3>
+        <p>Erzeugt die Unterrichtsverteilung. Standardverfahren ist CP-SAT (Google OR-Tools),
+          das harte Regeln exakt einhält; Simulated Annealing und Backtracking stehen als
+          Alternativen bereit.</p>
+        <span class="tag">Blatt: Klassen · Diagnose1</span>
+      </div>
+      <div class="func">
+        <h3>Nachträgliche Verbesserung</h3>
+        <p>Gleicht die Last einer fertigen Lösung weiter aus und dokumentiert das Ergebnis
+          als zusätzliche Verteilung. Optional zuschaltbar.</p>
+        <span class="tag">Blatt: Diagnose3 / Diagnose4</span>
+      </div>
+      <div class="func">
+        <h3>Bedarfsanalyse</h3>
+        <p>Zeigt je Fachgruppe den offenen Bedarf, die Zahl qualifizierter Lehrkräfte und die
+          reale Überlast — die Grundlage für Neueinstellungsentscheidungen.</p>
+        <span class="tag">Blatt: Neueinstellung</span>
+      </div>
+      <div class="func">
+        <h3>Simulation</h3>
+        <p>Prüft je Kandidatenprofil, wie viel Überlast eine Neueinstellung tatsächlich
+          abbauen würde — durch einen echten Optimierungslauf mit hypothetischer Lehrkraft.</p>
+        <span class="tag">Blatt: Neueinstellung_Simulation</span>
+      </div>
+      <div class="func">
+        <h3>Kombi-Simulation</h3>
+        <p>Stellt alle Kandidatenprofile gleichzeitig ein und bewertet den Gesamtplan —
+          nützlich, wenn mehrere Stellen zusammen besetzt werden.</p>
+        <span class="tag">Blatt: Neueinstellung_Sim_Kombi</span>
+      </div>
+      <div class="func">
+        <h3>Parameter</h3>
+        <p>Gewichte, Toleranz, Zeitlimit sowie globale und lehrerindividuelle Über- und
+          Unterlastgrenzen lassen sich direkt einstellen und werden in der Ergebnisdatei
+          dokumentiert.</p>
+        <span class="tag">Blatt: Parameter</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ablauf">
+  <div class="wrap">
+    <h2>Von Untis zur fertigen Verteilung</h2>
+    <p class="sub">Das Programm setzt auf den aus Untis exportierten Rohdaten auf und
+      liefert eine Verteilung, die sich wieder nach Untis übernehmen lässt.</p>
+    <div class="flow">
+      <div class="step"><b>Import</b><span>Lehrer-Stammdaten und Unterrichtsverteilung aus Untis in die Arbeitsmappe einfügen.</span></div>
+      <div class="step"><b>Aufbereiten</b><span>Soll-Anrechnungen berechnen, Fächer und Klassenleitungen ergänzen.</span></div>
+      <div class="step"><b>Optimieren</b><span>Verfahren wählen, starten — das Ergebnis landet in einer eigenen Ergebnisdatei.</span></div>
+      <div class="step"><b>Zurück nach Untis</b><span>Die zugeteilten Lehrkräfte (Spalte „Lehrer (L1)") in Untis übernehmen.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="spalten">
+  <div class="wrap">
+    <h2>Benötigte Daten</h2>
+    <p class="sub">Aus den Untis-Lehrer-Stammdaten werden drei Spalten über die Kopfzeile
+      gelesen (Position beliebig, Überschrift muss passen).</p>
+    <table class="cols">
+      <tr><th>Überschrift</th><th>Bedeutung</th></tr>
+      <tr><td><code>Name</code></td><td>Lehrerkürzel als Schlüssel</td></tr>
+      <tr><td><code>Soll/Woche</code></td><td>Soll-Deputat pro Woche (auch „Soll/Wo")</td></tr>
+      <tr><td><code>Anrechnung</code></td><td>Anrechnungsstunden (auch „Anrechnungen")</td></tr>
+    </table>
+    <div class="note">
+      <b>Wichtig:</b> Die Arbeitsblätter „Lehrerliste" und „Klassen" werden vom Programm
+      über feste Spaltenpositionen gelesen. Spalten dort nicht verschieben — Ausnahme sind
+      die optionalen Spalten „Max-Überlast" und „Max-Unterlast", die über die Kopfzeile
+      gefunden werden. Die vollständige Spaltenübersicht steht in der README.
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <h2>Herunterladen</h2>
+    <p class="sub">Programm und eine anonymisierte Beispieldatei liegen auf GitHub.</p>
+    <div class="dl">
+      <!-- GitHub-Adresse hier eintragen: -->
+      <a class="card" href="https://github.com/DEIN-KONTO/uv-optimierer/releases">
+        <b>Programm (Windows)</b>
+        <span>Ausführbare Datei bzw. Projektmappe aus dem Releases-Bereich.</span>
+      </a>
+      <a class="card" href="https://github.com/DEIN-KONTO/uv-optimierer/blob/main/UV-Muster_anon_Claude.xlsm">
+        <b>Beispieldatei</b>
+        <span>Anonymisierte Arbeitsmappe mit allen benötigten Blättern.</span>
+      </a>
+    </div>
+    <div class="note">
+      Voraussetzungen: Windows mit .NET 8. Das Standardverfahren CP-SAT nutzt Google OR-Tools;
+      ist es nicht verfügbar, stehen Simulated Annealing und Backtracking ohne diese
+      Abhängigkeit bereit.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    UV-Optimierer — Werkzeug zur automatischen Unterrichtsverteilung.
+    Quelltext, Releases und Beispieldatei auf
+    <!-- GitHub-Adresse hier eintragen: -->
+    <a href="https://github.com/DEIN-KONTO/uv-optimierer">GitHub</a>.
+  </div>
+</footer>
+
+</body>
+</html>

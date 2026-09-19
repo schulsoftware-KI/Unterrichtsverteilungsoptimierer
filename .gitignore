@@ -1,0 +1,7 @@
+bin/
+obj/
+*.user
+.vs/
+[Rr]elease/
+[Dd]ebug/
+*_Ergebnis.xlsm
